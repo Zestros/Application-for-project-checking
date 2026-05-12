@@ -121,4 +121,5 @@ def test_scan_with_missing_path_returns_error():
     result = runner.invoke(app, ["scan", missing_path, "--output-format", "json"])
 
     assert result.exit_code != 0
-    assert "Path does not exist" in result.stdout
+    error_output = result.stdout + result.stderr
+    assert "Path does not exist" in error_output
