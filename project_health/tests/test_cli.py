@@ -2,13 +2,10 @@ import importlib
 import json
 from dataclasses import asdict
 
-import project_health
 from typer.testing import CliRunner
 
+from project_health import __version__
 from project_health.models import CheckResult, ProjectReport, ScanFacts
-
-if not hasattr(project_health, "__version__"):
-    project_health.__version__ = "0.1.0"
 
 cli = importlib.import_module("project_health.cli")
 app = cli.app
@@ -49,7 +46,7 @@ def test_version_prints_package_version():
 
     assert result.exit_code == 0
     assert "project-health" in result.stdout
-    assert project_health.__version__ in result.stdout
+    assert __version__ in result.stdout
 
 
 def test_scan_json_output_uses_fake_dependencies(monkeypatch, tmp_path):
