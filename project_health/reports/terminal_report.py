@@ -37,7 +37,7 @@ class TerminalReport:
 
         self.console.print(f"Detected stack: {self._join(report.detected_stack)}")
         self.console.print(f"Required tools: {self._join(report.required_tools)}")
-        self.console.print(f"Available tools: {self._join(report.available_tools)}")
+        self.console.print(f"Available tools: {self._join(list(report.available_tools.keys()))}")
 
         table = Table(title="Checks")
         table.add_column("Check")
