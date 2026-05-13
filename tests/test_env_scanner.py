@@ -154,6 +154,24 @@ def test_docker_only_requirements_do_not_check_python(
     assert result.metadata["available_tools"] == ["docker"]
 
 
+def test_missing_dependency_files_make_environment_fail(tmp_path: Path) -> None:
+    result = EnvScanner(
+        tmp_path,
+        requirements={
+            "required_tools": [],
+            "package_managers": [],
+            "source_files": [],
+        },
+    ).scan()
+
+    assert result.passed is False
+    assert result.score == 0
+    assert result.metadata["dependency_files_found"] is False
+    assert result.issues == ["No dependency or build files found"]
+    assert result.recommendations == ["Add dependency or build configuration files"]
+    assert result.metadata["commands"] == {}
+
+
 def test_docker_compose_falls_back_to_legacy_command(
     tmp_path: Path,
     monkeypatch,

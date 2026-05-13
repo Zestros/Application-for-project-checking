@@ -38,6 +38,10 @@ class EnvScanner:
         metadata = self._empty_metadata()
         tools = self._tools_to_check()
         metadata["required_tools"] = tools
+        metadata["dependency_files_found"] = not self._dependency_files_missing()
+
+        if self._dependency_files_missing():
+            return self._result(metadata)
 
         for tool in tools:
             metadata["resolved_tools"][tool] = self._check_tool(tool, metadata)
@@ -83,6 +87,13 @@ class EnvScanner:
             normalized_tools.append(tool)
 
         return self._deduplicate(normalized_tools)
+
+    def _dependency_files_missing(self) -> bool:
+        if self.requirements is None:
+            return False
+        if "source_files" not in self.requirements:
+            return False
+        return not self.requirements["source_files"]
 
     def _check_tool(self, tool: str, metadata: dict[str, Any]) -> dict[str, Any]:
         if tool == "python":
@@ -452,6 +463,10 @@ class EnvScanner:
             if tool in self.RECOMMENDATIONS
         ]
 
+        if not metadata["dependency_files_found"]:
+            issues.append("No dependency or build files found")
+            recommendations.append("Add dependency or build configuration files")
+
         for mismatch in metadata["version_mismatches"]:
             issues.append(
                 f"{mismatch['tool']} version mismatch: "
@@ -462,7 +477,9 @@ class EnvScanner:
             )
 
         required_count = len(metadata["required_tools"])
-        if required_count == 0:
+        if not metadata["dependency_files_found"]:
+            score = 0
+        elif required_count == 0:
             score = 100
         else:
             score = int(len(metadata["available_tools"]) / required_count * 100)
@@ -472,7 +489,9 @@ class EnvScanner:
 
         return CheckResult(
             name="Environment",
-            passed=not metadata["missing_tools"] and not metadata["version_mismatches"],
+            passed=metadata["dependency_files_found"]
+            and not metadata["missing_tools"]
+            and not metadata["version_mismatches"],
             score=score,
             issues=self._deduplicate(issues),
             recommendations=self._deduplicate(recommendations),
