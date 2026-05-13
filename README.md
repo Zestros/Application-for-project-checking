@@ -55,8 +55,8 @@ python -m pip install .[dev]
 `pyproject.toml` defines a CLI command:
 
 ```bash
-project-health version
-project-health scan .
+pha version
+pha scan .
 ```
 
 If the entry point is not available, you can run the module directly:
@@ -71,32 +71,32 @@ python -m project_health.cli scan .
 Print the current version:
 
 ```bash
-project-health version
+pha version
 ```
 
 Scan the current project with terminal output:
 
 ```bash
-project-health scan .
+pha scan .
 ```
 
 Scan another directory:
 
 ```bash
-project-health scan /path/to/project
+pha scan /path/to/project
 ```
 
 Generate a JSON report:
 
 ```bash
-project-health scan . --output-format json
+pha scan . --output-format json
 ```
 
 Use the short format option:
 
 ```bash
-project-health scan . -o terminal
-project-health scan . -o json
+pha scan . -o terminal
+pha scan . -o json
 ```
 
 ## Program Output
@@ -113,14 +113,15 @@ After `scan` runs, the program:
 
 The terminal report includes:
 
-- project path;
-- final score and status;
-- detected stack;
-- required and available tools;
-- a table with `Check`, `Passed`, `Score`, `Issues`, and `Recommendations`;
-- a final recommendation list, if any.
+- a compact header panel with the project path, detected stack, final score, score bar, and status;
+- a `Tools` section with required and available tools;
+- dependency lines for runtime and development packages when they are detected;
+- a compact `Dependencies: none detected` line when no dependency lists are available;
+- a `Status` section with a short explanation of the final status;
+- a `Checks` table with `Check`, `Result`, `Score`, and `Issues`;
+- a numbered `Recommendations` list, or `No recommendations` when there are none.
 
-The JSON output returns a serialized report object containing at least:
+The JSON output still uses the same `--output-format json` or `-o json` flag and returns a serialized report object containing at least:
 
 - `path`;
 - `score`;
@@ -171,10 +172,13 @@ pytest tests/test_project_scanner.py
 ## Common Errors and Fixes
 
 `Path does not exist: ...`
-Check the path passed to `project-health scan`.
+Check the path passed to `pha scan`.
 
 `output_format must be 'terminal' or 'json'.`
 Use only `terminal` or `json`.
+
+`pha scan <path> --json` does not work
+The CLI does not implement a `--json` flag. Use `pha scan <path> --output-format json` or `pha scan <path> -o json`.
 
 `python not found`, `pip not found`, `docker not found`, and similar messages
 Install the missing tool or adjust the project configuration so the tool is not required unnecessarily.
