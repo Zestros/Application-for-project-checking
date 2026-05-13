@@ -19,7 +19,7 @@ dev = [
 ]
 
 [project.scripts]
-project-health = "project_health.cli:app"
+pha = "project_health.cli:app"
 
 [tool.setuptools.dynamic]
 version = {attr = "project_health.__version__"}
