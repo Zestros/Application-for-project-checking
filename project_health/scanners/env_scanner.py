@@ -58,6 +58,7 @@ class EnvScanner:
         ]
 
         self._check_python_version(metadata)
+        self._check_python_packages(metadata)
 
         return self._result(metadata)
 
@@ -68,6 +69,8 @@ class EnvScanner:
             "missing_tools": [],
             "resolved_tools": {},
             "version_mismatches": [],
+            "missing_packages": [],
+            "missing_dev_packages": [],
             "commands": {},
         }
 
@@ -379,6 +382,53 @@ class EnvScanner:
             }
         )
 
+    def _check_python_packages(self, metadata: dict[str, Any]) -> None:
+        if self.requirements is None:
+            return
+
+        python = metadata["resolved_tools"].get("python")
+        if not python or not python["available"] or not python["path"]:
+            return
+
+        dependencies = self.requirements.get("dependencies", {}).get("python", [])
+        dev_dependencies = self.requirements.get("dev_dependencies", {}).get(
+            "python",
+            [],
+        )
+
+        self._check_package_group("runtime", dependencies, python["path"], metadata)
+        self._check_package_group("dev", dev_dependencies, python["path"], metadata)
+
+    def _check_package_group(
+        self,
+        group: str,
+        packages: list[str],
+        python_path: str,
+        metadata: dict[str, Any],
+    ) -> None:
+        for package in self._deduplicate(packages):
+            if package == "python":
+                continue
+            result = run_command(
+                [
+                    python_path,
+                    "-c",
+                    (
+                        "import importlib.metadata as m; "
+                        f"m.version({package!r})"
+                    ),
+                ]
+            )
+            self._record_command(f"python package:{package}", result, metadata)
+
+            if result.available:
+                continue
+
+            if group == "dev":
+                metadata["missing_dev_packages"].append(package)
+            else:
+                metadata["missing_packages"].append(package)
+
     def _python_requirement(self) -> str | None:
         runtime = {}
         if self.requirements is not None:
@@ -476,6 +526,15 @@ class EnvScanner:
                 f"Use Python {mismatch['required']} via .venv, pyenv, or system Python"
             )
 
+        for package in metadata["missing_packages"]:
+            issues.append(f"runtime dependency not installed: {package}")
+            recommendations.append("Install declared runtime dependencies")
+
+        for package in metadata["missing_dev_packages"]:
+            recommendations.append(
+                f"Install declared dev dependency when developing: {package}"
+            )
+
         required_count = len(metadata["required_tools"])
         if not metadata["dependency_files_found"]:
             score = 0
@@ -485,13 +544,15 @@ class EnvScanner:
             score = int(len(metadata["available_tools"]) / required_count * 100)
 
         score -= 20 * len(metadata["version_mismatches"])
+        score -= 20 * len(metadata["missing_packages"])
         score = max(0, min(100, score))
 
         return CheckResult(
             name="Environment",
             passed=metadata["dependency_files_found"]
             and not metadata["missing_tools"]
-            and not metadata["version_mismatches"],
+            and not metadata["version_mismatches"]
+            and not metadata["missing_packages"],
             score=score,
             issues=self._deduplicate(issues),
             recommendations=self._deduplicate(recommendations),

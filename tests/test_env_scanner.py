@@ -360,6 +360,88 @@ def test_setuptools_does_not_require_setuptools_command(
     assert not any(command[0] == "setuptools" for command in calls)
 
 
+def test_missing_runtime_dependency_makes_environment_fail(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    venv_python = str(tmp_path / ".venv" / "bin" / "python")
+
+    def fake_run(command: list[str], timeout: int = 5) -> CommandResult:
+        if command == [venv_python, "--version"]:
+            return command_result(command, True, "Python 3.11.8")
+        if command == [venv_python, "-m", "pip", "--version"]:
+            return command_result(command, True, "pip 24.0")
+        if command == [
+            venv_python,
+            "-c",
+            "import importlib.metadata as m; m.version('rich')",
+        ]:
+            return command_result(command, False, error="PackageNotFoundError")
+        return command_result(command, False, error="not found")
+
+    monkeypatch.setattr(env_scanner, "run_command", fake_run)
+
+    result = EnvScanner(
+        tmp_path,
+        requirements={
+            "required_tools": ["python", "pip"],
+            "package_managers": ["pip"],
+            "source_files": ["pyproject.toml"],
+            "dependencies": {"python": ["rich"]},
+            "dev_dependencies": {"python": []},
+        },
+    ).scan()
+
+    assert result.passed is False
+    assert result.score == 80
+    assert result.metadata["missing_packages"] == ["rich"]
+    assert result.metadata["missing_dev_packages"] == []
+    assert result.issues == ["runtime dependency not installed: rich"]
+    assert result.recommendations == ["Install declared runtime dependencies"]
+
+
+def test_missing_dev_dependency_is_recommendation_only(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    venv_python = str(tmp_path / ".venv" / "bin" / "python")
+
+    def fake_run(command: list[str], timeout: int = 5) -> CommandResult:
+        if command == [venv_python, "--version"]:
+            return command_result(command, True, "Python 3.11.8")
+        if command == [venv_python, "-m", "pip", "--version"]:
+            return command_result(command, True, "pip 24.0")
+        if command == [
+            venv_python,
+            "-c",
+            "import importlib.metadata as m; m.version('pytest')",
+        ]:
+            return command_result(command, False, error="PackageNotFoundError")
+        return command_result(command, False, error="not found")
+
+    monkeypatch.setattr(env_scanner, "run_command", fake_run)
+
+    result = EnvScanner(
+        tmp_path,
+        requirements={
+            "required_tools": ["python", "pip"],
+            "package_managers": ["pip"],
+            "source_files": ["pyproject.toml"],
+            "dependencies": {"python": []},
+            "dev_dependencies": {"python": ["pytest"]},
+        },
+    ).scan()
+
+    assert result.passed is True
+    assert result.score == 100
+    assert result.metadata["missing_packages"] == []
+    assert result.metadata["missing_dev_packages"] == ["pytest"]
+    assert result.issues == []
+    assert result.recommendations == [
+        "Install declared dev dependency when developing: pytest"
+    ]
+
+
 def test_all_command_results_are_recorded(tmp_path: Path, monkeypatch) -> None:
     def fake_run(command: list[str], timeout: int = 5) -> CommandResult:
         if command == ["docker", "--version"]:
