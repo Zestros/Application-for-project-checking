@@ -11,6 +11,7 @@
 - detects required environment tools, including `python`, `pip`, `poetry`, `pipenv`, `uv`, `hatch`, `pdm`, `flit`, `rye`, `docker`, and `docker compose`;
 - tries to find a suitable Python interpreter via `.venv`, `VIRTUAL_ENV`, `pyenv`, and system commands;
 - compares the detected Python version against the project requirements;
+- checks declared runtime and development Python packages and, when possible, shows which of them are available in the current environment;
 - renders the report in terminal or JSON format.
 
 ## Project Structure
@@ -131,6 +132,10 @@ The JSON output still uses the same `--output-format json` or `-o json` flag and
 - `detected_stack`;
 - `required_tools`;
 - `available_tools`.
+- `runtime_dependencies`;
+- `available_runtime_dependencies`;
+- `dev_dependencies`;
+- `available_dev_dependencies`.
 
 ## Development
 
@@ -159,14 +164,14 @@ python -m pip install .[dev]
 Run all tests:
 
 ```bash
-pytest
+python -m pytest
 ```
 
 You can also run specific test files, for example:
 
 ```bash
-pytest tests/test_cli.py
-pytest tests/test_project_scanner.py
+python -m pytest tests/test_cli.py
+python -m pytest tests/test_project_scanner.py
 ```
 
 ## Common Errors and Fixes
@@ -182,6 +187,9 @@ The CLI does not implement a `--json` flag. Use `pha scan <path> --output-format
 
 `python not found`, `pip not found`, `docker not found`, and similar messages
 Install the missing tool or adjust the project configuration so the tool is not required unnecessarily.
+
+`Install declared dev dependency when developing: pytest`
+This is a development-environment recommendation, not a runtime error. Install the declared dev dependency when you want to run tests or work on the project locally.
 
 `python version mismatch: required ..., found ...`
 The current Python version does not match the requirement from `.python-version` or dependency files. Use a matching version via `.venv`, `pyenv`, or the system Python.
