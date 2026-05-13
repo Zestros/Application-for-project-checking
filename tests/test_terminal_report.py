@@ -69,12 +69,16 @@ def test_render_prints_project_report_data():
     assert "Python" in output
     assert "Docker" in output
     assert "git" in output
-    assert "Runtime dependencies" in output
+    assert "Project Health Analyzer" in output
+    assert "Required:" in output
+    assert "Available:" in output
+    assert "Runtime deps" in output
     assert "rich, typer" in output
-    assert "Available runtime dependencies" in output
-    assert "Dev dependencies" in output
+    assert "Available runtime deps" in output
+    assert "Dev deps" in output
     assert "pytest" in output
-    assert "Available dev dependencies" in output
+    assert "Status" in output
+    assert "Recommendations" in output
 
 
 def test_join_returns_items_joined_by_comma():
@@ -92,8 +96,8 @@ def test_join_returns_none_detected_for_empty_list():
 def test_status_color_returns_expected_values():
     report_renderer = TerminalReport(console=Console(record=True))
 
-    assert report_renderer._status_color("Critical") == "red"
-    assert report_renderer._status_color("Weak") == "yellow"
-    assert report_renderer._status_color("Good") == "green"
-    assert report_renderer._status_color("Excellent") == "bold green"
+    assert report_renderer._status_color("Critical") == "bold red"
+    assert report_renderer._status_color("Weak") == "bold yellow"
+    assert report_renderer._status_color("Good") == "bold green"
+    assert report_renderer._status_color("Excellent") == "bold bright_green"
     assert report_renderer._status_color("Unknown") == "white"
