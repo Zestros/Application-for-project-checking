@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "project-health"
+dynamic = ["version"]
+description = "CLI utility for checking Python project health."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "rich>=15.0.0",
+    "typer>=0.25.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.3",
+]
+
+[project.scripts]
+project-health = "project_health.cli:app"
+
+[tool.setuptools.dynamic]
+version = {attr = "project_health.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["project_health*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
