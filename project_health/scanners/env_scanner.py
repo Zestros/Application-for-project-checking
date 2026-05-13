@@ -69,6 +69,8 @@ class EnvScanner:
             "missing_tools": [],
             "resolved_tools": {},
             "version_mismatches": [],
+            "available_packages": [],
+            "available_dev_packages": [],
             "missing_packages": [],
             "missing_dev_packages": [],
             "commands": {},
@@ -422,6 +424,12 @@ class EnvScanner:
             self._record_command(f"python package:{package}", result, metadata)
 
             if result.available:
+                target = (
+                    "available_dev_packages"
+                    if group == "dev"
+                    else "available_packages"
+                )
+                metadata[target].append(package)
                 continue
 
             if group == "dev":

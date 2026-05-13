@@ -442,6 +442,50 @@ def test_missing_dev_dependency_is_recommendation_only(
     ]
 
 
+def test_available_python_packages_are_recorded(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    venv_python = str(tmp_path / ".venv" / "bin" / "python")
+
+    def fake_run(command: list[str], timeout: int = 5) -> CommandResult:
+        if command == [venv_python, "--version"]:
+            return command_result(command, True, "Python 3.11.8")
+        if command == [venv_python, "-m", "pip", "--version"]:
+            return command_result(command, True, "pip 24.0")
+        if command == [
+            venv_python,
+            "-c",
+            "import importlib.metadata as m; m.version('rich')",
+        ]:
+            return command_result(command, True, "15.0.0")
+        if command == [
+            venv_python,
+            "-c",
+            "import importlib.metadata as m; m.version('pytest')",
+        ]:
+            return command_result(command, True, "9.0.3")
+        return command_result(command, False, error="not found")
+
+    monkeypatch.setattr(env_scanner, "run_command", fake_run)
+
+    result = EnvScanner(
+        tmp_path,
+        requirements={
+            "required_tools": ["python", "pip"],
+            "package_managers": ["pip"],
+            "source_files": ["pyproject.toml"],
+            "dependencies": {"python": ["rich"]},
+            "dev_dependencies": {"python": ["pytest"]},
+        },
+    ).scan()
+
+    assert result.metadata["available_packages"] == ["rich"]
+    assert result.metadata["available_dev_packages"] == ["pytest"]
+    assert result.metadata["missing_packages"] == []
+    assert result.metadata["missing_dev_packages"] == []
+
+
 def test_all_command_results_are_recorded(tmp_path: Path, monkeypatch) -> None:
     def fake_run(command: list[str], timeout: int = 5) -> CommandResult:
         if command == ["docker", "--version"]:

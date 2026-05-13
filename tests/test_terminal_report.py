@@ -16,6 +16,30 @@ def test_render_prints_project_report_data():
                 score=10,
                 issues=["missing badges"],
                 recommendations=["add badges"],
+            ),
+            CheckResult(
+                name="Dependencies",
+                passed=True,
+                score=100,
+                metadata={
+                    "requirements": {
+                        "dependencies": {
+                            "python": ["rich", "typer"],
+                        },
+                        "dev_dependencies": {
+                            "python": ["pytest"],
+                        },
+                    },
+                },
+            ),
+            CheckResult(
+                name="Environment",
+                passed=True,
+                score=100,
+                metadata={
+                    "available_packages": ["rich", "typer"],
+                    "available_dev_packages": [],
+                },
             )
         ],
         recommendations=["improve docs"],
@@ -45,6 +69,12 @@ def test_render_prints_project_report_data():
     assert "Python" in output
     assert "Docker" in output
     assert "git" in output
+    assert "Runtime dependencies" in output
+    assert "rich, typer" in output
+    assert "Available runtime dependencies" in output
+    assert "Dev dependencies" in output
+    assert "pytest" in output
+    assert "Available dev dependencies" in output
 
 
 def test_join_returns_items_joined_by_comma():

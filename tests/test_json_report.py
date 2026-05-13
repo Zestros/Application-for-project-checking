@@ -14,6 +14,30 @@ def test_render_returns_json_with_project_report_data():
                 name="readme",
                 passed=True,
                 score=10,
+            ),
+            CheckResult(
+                name="Dependencies",
+                passed=True,
+                score=100,
+                metadata={
+                    "requirements": {
+                        "dependencies": {
+                            "python": ["rich", "typer"],
+                        },
+                        "dev_dependencies": {
+                            "python": ["pytest"],
+                        },
+                    },
+                },
+            ),
+            CheckResult(
+                name="Environment",
+                passed=True,
+                score=100,
+                metadata={
+                    "available_packages": ["rich", "typer"],
+                    "available_dev_packages": [],
+                },
             )
         ],
     )
@@ -29,3 +53,7 @@ def test_render_returns_json_with_project_report_data():
     assert payload["checks"][0]["name"] == "readme"
     assert payload["checks"][0]["passed"] is True
     assert payload["checks"][0]["score"] == 10
+    assert payload["runtime_dependencies"] == ["rich", "typer"]
+    assert payload["available_runtime_dependencies"] == ["rich", "typer"]
+    assert payload["dev_dependencies"] == ["pytest"]
+    assert payload["available_dev_dependencies"] == []
