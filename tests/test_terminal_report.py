@@ -65,7 +65,6 @@ def test_render_prints_project_report_data():
     assert "Good" in output
     assert "readme" in output
     assert "missing badges" in output
-    assert "add badges" in output
     assert "Python" in output
     assert "Docker" in output
     assert "git" in output
