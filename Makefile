@@ -1,4 +1,4 @@
-.PHONY: help venv install test coverage build run docker-build docker-run
+.PHONY: help venv install test coverage build run docs docker-build docker-run
 
 IMAGE_NAME ?= project-health
 SCAN_PATH ?= .
@@ -14,6 +14,7 @@ help:
 	@echo "coverage      run tests with coverage report"
 	@echo "build         build package distributions"
 	@echo "run           run CLI scan for SCAN_PATH, default current directory"
+	@echo "docs          build project documentation"
 	@echo "docker-build  build Docker image"
 	@echo "docker-run    run CLI scan inside Docker for the current repository"
 
@@ -35,6 +36,9 @@ build:
 
 run:
 	$(VENV_PHA) scan $(SCAN_PATH)
+
+docs:
+	$(VENV_PYTHON) -m mkdocs build
 
 docker-build:
 	docker build -t $(IMAGE_NAME) .

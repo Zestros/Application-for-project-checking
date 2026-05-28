@@ -14,6 +14,7 @@ build/
 dist/
 *.egg-info/
 .eggs/
+site/
 
 # Test and coverage artifacts
 .pytest_cache/

@@ -1,0 +1,17 @@
+site_name: Project Health
+site_description: CLI tool for checking Python project readiness.
+repo_name: Application-for-project-checking
+docs_dir: docs
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - Specification: specification.md
+  - Architecture: architecture.md
+  - Diagrams: diagrams.md

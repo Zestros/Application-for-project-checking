@@ -16,6 +16,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "build>=1.2.0",
+    "mkdocs>=1.6.0",
+    "pymdown-extensions>=10.0",
     "pytest>=9.0.3",
     "pytest-cov>=7.0.0",
     "setuptools>=68",
