@@ -1,0 +1,40 @@
+classDiagram
+    class CommandResult {
+        +list~str~ command
+        +bool available
+        +str output
+        +str? error
+    }
+
+    class CheckResult {
+        +str name
+        +bool passed
+        +int score
+        +list~str~ issues
+        +list~str~ recommendations
+        +dict metadata
+    }
+
+    class ScanFacts {
+        +str path
+        +list~CheckResult~ checks
+        +list~str~ detected_stack
+        +list~str~ required_tools
+        +dict~str, CommandResult~ available_tools
+    }
+
+    class ProjectReport {
+        +str path
+        +int score
+        +str status
+        +list~CheckResult~ checks
+        +list~str~ recommendations
+        +list~str~ detected_stack
+        +list~str~ required_tools
+        +dict~str, CommandResult~ available_tools
+    }
+
+    ScanFacts "1" --> "many" CheckResult : contains
+    ScanFacts "1" --> "many" CommandResult : available_tools
+    ProjectReport "1" --> "many" CheckResult : contains
+    ProjectReport "1" --> "many" CommandResult : available_tools

@@ -1,0 +1,21 @@
+flowchart LR
+    User[User / Student / Teacher]
+    Shell[Terminal / CLI shell]
+    Project[Target project folder]
+    PH[project-health CLI]
+    PythonEnv[Local Python environment]
+    Docker[Docker / Docker Compose]
+    Output[Terminal or JSON report]
+
+    User -->|runs pha scan PATH| Shell
+    Shell --> PH
+    PH -->|reads files| Project
+    PH -->|checks python, pip, packages| PythonEnv
+    PH -->|checks docker tools when required| Docker
+    PH -->|prints result| Output
+    Output --> User
+
+    Project -. contains .-> README[README]
+    Project -. contains .-> License[LICENSE]
+    Project -. contains .-> Git[.git / .gitignore]
+    Project -. contains .-> BuildFiles[pyproject.toml / requirements / Dockerfile / compose.yaml]

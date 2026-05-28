@@ -1,0 +1,57 @@
+flowchart TB
+    subgraph CLI[CLI layer]
+        TyperApp[Typer app: scan / version]
+    end
+
+    subgraph Scanning[Scanning layer]
+        ProjectScanner[ProjectScanner]
+        ReadmeScanner[ReadmeScanner]
+        LicenseScanner[LicenseScanner]
+        GitScanner[GitScanner]
+        DependencyScanner[DependencyScanner]
+        EnvScanner[EnvScanner]
+        CommandRunner[utils.command_runner]
+    end
+
+    subgraph Analysis[Analysis layer]
+        ReadinessAnalyzer[ReadinessAnalyzer]
+        RecommendationEngine[RecommendationEngine]
+    end
+
+    subgraph Reporting[Reporting layer]
+        TerminalReport[TerminalReport]
+        JsonReport[JsonReport]
+    end
+
+    subgraph Models[Shared models]
+        CheckResult[CheckResult]
+        ScanFacts[ScanFacts]
+        ProjectReport[ProjectReport]
+        CommandResult[CommandResult]
+    end
+
+    TyperApp --> ProjectScanner
+    TyperApp --> ReadinessAnalyzer
+    TyperApp --> TerminalReport
+    TyperApp --> JsonReport
+
+    ProjectScanner --> ReadmeScanner
+    ProjectScanner --> LicenseScanner
+    ProjectScanner --> GitScanner
+    ProjectScanner --> DependencyScanner
+    ProjectScanner --> EnvScanner
+    EnvScanner --> CommandRunner
+
+    ReadmeScanner --> CheckResult
+    LicenseScanner --> CheckResult
+    GitScanner --> CheckResult
+    DependencyScanner --> CheckResult
+    EnvScanner --> CheckResult
+    ProjectScanner --> ScanFacts
+
+    ReadinessAnalyzer --> RecommendationEngine
+    ReadinessAnalyzer --> ProjectReport
+    RecommendationEngine --> CheckResult
+
+    TerminalReport --> ProjectReport
+    JsonReport --> ProjectReport

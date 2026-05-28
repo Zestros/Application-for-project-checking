@@ -1,0 +1,39 @@
+flowchart LR
+    Student[Student / Beginner developer]
+    Teacher[Teacher / Reviewer]
+    Maintainer[Project maintainer]
+
+    subgraph System[project-health]
+        UC1[Scan current project]
+        UC2[Scan another project path]
+        UC3[Check README quality]
+        UC4[Check license]
+        UC5[Check Git and .gitignore]
+        UC6[Detect dependencies and stack]
+        UC7[Check local environment tools]
+        UC8[Generate terminal report]
+        UC9[Generate JSON report]
+        UC10[Read recommendations]
+    end
+
+    Student --> UC1
+    Student --> UC2
+    Student --> UC10
+    Teacher --> UC2
+    Teacher --> UC8
+    Teacher --> UC9
+    Maintainer --> UC6
+    Maintainer --> UC7
+
+    UC1 --> UC3
+    UC1 --> UC4
+    UC1 --> UC5
+    UC1 --> UC6
+    UC1 --> UC7
+    UC2 --> UC3
+    UC2 --> UC4
+    UC2 --> UC5
+    UC2 --> UC6
+    UC2 --> UC7
+    UC8 --> UC10
+    UC9 --> UC10

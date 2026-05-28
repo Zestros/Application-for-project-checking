@@ -1,0 +1,30 @@
+sequenceDiagram
+    actor User
+    participant CLI as project_health.cli
+    participant Scanner as ProjectScanner
+    participant Readme as ReadmeScanner
+    participant License as LicenseScanner
+    participant Git as GitScanner
+    participant Dependency as DependencyScanner
+    participant Env as EnvScanner
+    participant Analyzer as ReadinessAnalyzer
+    participant Renderer as TerminalReport / JsonReport
+
+    User->>CLI: pha scan <path> --output-format terminal|json
+    CLI->>CLI: validate path and output format
+    CLI->>Scanner: ProjectScanner(path).scan()
+    Scanner->>Readme: scan()
+    Readme-->>Scanner: CheckResult(readme)
+    Scanner->>License: scan()
+    License-->>Scanner: CheckResult(license)
+    Scanner->>Git: scan()
+    Git-->>Scanner: CheckResult(git)
+    Scanner->>Dependency: scan()
+    Dependency-->>Scanner: CheckResult(Dependencies) + requirements metadata
+    Scanner->>Env: EnvScanner(path, requirements).scan()
+    Env-->>Scanner: CheckResult(Environment) + available tools
+    Scanner-->>CLI: ScanFacts
+    CLI->>Analyzer: analyze(ScanFacts)
+    Analyzer-->>CLI: ProjectReport(score, status, recommendations)
+    CLI->>Renderer: render(ProjectReport)
+    Renderer-->>User: terminal table or JSON payload

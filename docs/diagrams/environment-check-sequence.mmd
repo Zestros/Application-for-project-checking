@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant Dependency as DependencyScanner
+    participant ProjectScanner
+    participant Env as EnvScanner
+    participant Runner as run_command
+    participant Python as Python / pip / docker commands
+
+    ProjectScanner->>Dependency: scan dependency and build files
+    Dependency-->>ProjectScanner: requirements metadata
+    ProjectScanner->>Env: scan(requirements)
+    Env->>Env: build required tool list
+    loop each required tool
+        Env->>Runner: run candidate command
+        Runner->>Python: execute command with timeout
+        Python-->>Runner: stdout/stderr/exit code
+        Runner-->>Env: CommandResult
+    end
+    Env->>Env: check Python version requirement
+    Env->>Env: check declared runtime/dev packages
+    Env-->>ProjectScanner: CheckResult(Environment)
