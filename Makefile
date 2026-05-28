@@ -44,6 +44,9 @@ run:
 docs:
 	$(VENV_PYTHON) -m mkdocs build
 
+docs-serve:
+	$(VENV_PYTHON) -m mkdocs serve
+
 docker-build:
 	docker build -t $(IMAGE_NAME) .
 
