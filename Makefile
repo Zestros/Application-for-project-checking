@@ -1,4 +1,4 @@
-.PHONY: help venv install test coverage build run docs docker-build docker-run
+.PHONY: help venv install test coverage coverage-html build run docs docker-build docker-run
 
 IMAGE_NAME ?= project-health
 SCAN_PATH ?= .
@@ -12,6 +12,7 @@ help:
 	@echo "install       install package with development dependencies"
 	@echo "test          run tests"
 	@echo "coverage      run tests with coverage report"
+	@echo "coverage-html run tests with HTML coverage report"
 	@echo "build         build package distributions"
 	@echo "run           run CLI scan for SCAN_PATH, default current directory"
 	@echo "docs          build project documentation"
@@ -30,6 +31,9 @@ test:
 
 coverage:
 	$(VENV_PYTHON) -m pytest --cov=project_health --cov-report=term-missing
+
+coverage-html:
+	$(VENV_PYTHON) -m pytest --cov=project_health --cov-report=term-missing --cov-report=html
 
 build:
 	$(VENV_PYTHON) -m build --no-isolation
